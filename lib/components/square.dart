@@ -31,10 +31,11 @@ class Square extends StatelessWidget {
       squarecolor = iswhite ? Colors.grey[400] : Colors.grey[700];
     }
 
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
       child: Container(
         color: squarecolor,
+        margin: EdgeInsets.all(isValidMove ? 8 : 0),
         child: piece != null
             ? SvgPicture.asset(
                 piece!.imagePath,

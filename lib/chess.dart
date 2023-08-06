@@ -1,3 +1,4 @@
+import 'package:chess/components/dead_piece.dart';
 import 'package:chess/components/piece.dart';
 import 'package:chess/components/square.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,9 @@ class _ChessState extends State<Chess> {
   int SelectedRow = -1;
   int SelectedCol = -1;
 
+  List<ChessPiece> WhitePieceTaken = [];
+  List<ChessPiece> BlackPieceTaken = [];
+
   List<List<int>> validMoves = [];
 
   @override
@@ -32,10 +36,18 @@ class _ChessState extends State<Chess> {
 
   void PieceSelected(int row, int col) {
     setState(() {
-      if (board[row][col] != null) {
+      if (SelectedPiece == null && board[row][col] != null) {
         SelectedPiece = board[row][col];
         SelectedRow = row;
         SelectedCol = col;
+      } else if (board[row][col] != null &&
+          board[row][col]!.iswhite == SelectedPiece!.iswhite) {
+        SelectedPiece = board[row][col];
+        SelectedRow = row;
+        SelectedCol = col;
+      } else if (SelectedPiece != null &&
+          validMoves.any((element) => element[0] == row && element[1] == col)) {
+        movePiece(row, col);
       }
       validMoves =
           CalculateRawValidMoves(SelectedRow, SelectedCol, SelectedPiece);
@@ -44,7 +56,12 @@ class _ChessState extends State<Chess> {
 
   List<List<int>> CalculateRawValidMoves(int row, int col, ChessPiece? piece) {
     List<List<int>> candidateMoves = [];
-    int direction = piece!.iswhite ? -1 : 1;
+
+    if (piece == null) {
+      return [];
+    }
+
+    int direction = piece.iswhite ? -1 : 1;
 
     switch (piece.type) {
       case ChessPieceType.pawn:
@@ -67,6 +84,16 @@ class _ChessState extends State<Chess> {
         if (isInBoard(row + direction, col + 1) &&
             board[row + direction][col + 1] != null &&
             board[row + direction][col + 1]!.iswhite) {
+          candidateMoves.add([row + direction, col + 1]);
+        }
+        if (isInBoard(row + direction, col - 1) &&
+            board[row + direction][col - 1] != null &&
+            !(board[row + direction][col - 1]!.iswhite)) {
+          candidateMoves.add([row + direction, col - 1]);
+        }
+        if (isInBoard(row + direction, col + 1) &&
+            board[row + direction][col + 1] != null &&
+            !(board[row + direction][col - 1]!.iswhite)) {
           candidateMoves.add([row + direction, col + 1]);
         }
 
@@ -128,17 +155,90 @@ class _ChessState extends State<Chess> {
 
         break;
       case ChessPieceType.bishop:
-        var directions=[
-          [1,1],
-          [-1,1],
-          [1,-1],
-          [-1,-1],
+        var directions = [
+          [1, 1],
+          [-1, 1],
+          [1, -1],
+          [-1, -1],
         ];
+
+        for (var direction in directions) {
+          var i = 1;
+          while (true) {
+            var newRow = row + i * direction[0];
+            var newCol = col + i * direction[1];
+            if (!isInBoard(newRow, newCol)) {
+              break;
+            }
+            if (board[newRow][newCol] != null) {
+              if (board[newRow][newCol]!.iswhite != piece.iswhite) {
+                candidateMoves.add([newRow, newCol]);
+              }
+              break;
+            }
+            candidateMoves.add([newRow, newCol]);
+            i++;
+          }
+        }
 
         break;
       case ChessPieceType.queen:
+        var directions = [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+          [1, 1],
+          [1, -1],
+          [-1, 1],
+          [-1, -1],
+        ];
+
+        for (var direction in directions) {
+          var i = 1;
+          while (true) {
+            var newRow = row + i * direction[0];
+            var newCol = col + i * direction[1];
+            if (!isInBoard(newRow, newCol)) {
+              break;
+            }
+            if (board[newRow][newCol] != null) {
+              if (board[newRow][newCol]!.iswhite != piece.iswhite) {
+                candidateMoves.add([newRow, newCol]);
+              }
+              break;
+            }
+            candidateMoves.add([newRow, newCol]);
+            i++;
+          }
+        }
+
         break;
       case ChessPieceType.king:
+        var directions = [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+          [1, 1],
+          [1, -1],
+          [-1, 1],
+          [-1, -1],
+        ];
+        for (var direction in directions) {
+          var newRow = row + direction[0];
+          var newCol = col + direction[1];
+          if (!isInBoard(newRow, newCol)) {
+            break;
+          }
+          if (board[newRow][newCol] != null) {
+            if (board[newRow][newCol]!.iswhite != piece.iswhite) {
+              candidateMoves.add([newRow, newCol]);
+            }
+            break;
+          }
+          candidateMoves.add([newRow, newCol]);
+        }
         break;
     }
     return candidateMoves;
@@ -258,37 +358,86 @@ class _ChessState extends State<Chess> {
     board = newBoard;
   }
 
+  void movePiece(int newRow, int newCol) {
+    if (board[newRow][newCol] != null) {
+      var capturedPiece = board[newRow][newCol];
+      if (capturedPiece!.iswhite) {
+        WhitePieceTaken.add(capturedPiece);
+      } else {
+        BlackPieceTaken.add(capturedPiece);
+      }
+    }
+
+    board[newRow][newCol] = SelectedPiece;
+    board[SelectedRow][SelectedCol] = null;
+
+    setState(() {
+      SelectedPiece = null;
+      SelectedRow = -1;
+      SelectedCol = -1;
+      validMoves = [];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GridView.builder(
-        itemCount: 8 * 8,
-        physics: NeverScrollableScrollPhysics(),
-        gridDelegate:
-            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
-        itemBuilder: (context, index) {
-          int row = index ~/ 8;
-          int col = index % 8;
+      backgroundColor: Colors.grey[500],
+      body: Column(
+        children: [
+          Expanded(
+              child: GridView.builder(
+                itemCount: WhitePieceTaken.length,
+            gridDelegate:
+                SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
+            itemBuilder: (context, index) => DeadPiece(
+              ImagePath: WhitePieceTaken[index].imagePath,
+              isWhite: true,
+            ),
+          )),
+          Expanded(
+            flex: 3,
+            child: GridView.builder(
+              itemCount: 8 * 8,
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 8),
+              itemBuilder: (context, index) {
+                int row = index ~/ 8;
+                int col = index % 8;
 
-          bool iswhite = (row + col) % 2 == 0;
-          bool isSelected = SelectedRow == row && SelectedCol == col;
+                bool iswhite = (row + col) % 2 == 0;
+                bool isSelected = SelectedRow == row && SelectedCol == col;
 
-          bool isValidMove = false;
+                bool isValidMove = false;
 
-          for (var position in validMoves) {
-            if (position[0] == row && position[1] == col) {
-              isValidMove = true;
-            }
-          }
+                for (var position in validMoves) {
+                  if (position[0] == row && position[1] == col) {
+                    isValidMove = true;
+                  }
+                }
 
-          return Square(
-            iswhite: iswhite,
-            piece: board[row][col],
-            isSelected: isSelected,
-            onTap: () => PieceSelected(row, col),
-            isValidMove: isValidMove,
-          );
-        },
+                return Square(
+                  iswhite: iswhite,
+                  piece: board[row][col],
+                  isSelected: isSelected,
+                  onTap: () => PieceSelected(row, col),
+                  isValidMove: isValidMove,
+                );
+              },
+            ),
+          ),
+          Expanded(
+              child: GridView.builder(
+                itemCount: BlackPieceTaken.length,
+                gridDelegate:
+                SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
+                itemBuilder: (context, index) => DeadPiece(
+                  ImagePath: BlackPieceTaken[index].imagePath,
+                  isWhite: false,
+                ),
+              ))
+        ],
       ),
     );
   }
