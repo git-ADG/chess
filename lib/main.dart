@@ -1,10 +1,9 @@
 import 'package:chess/chess.dart';
 import 'package:flutter/material.dart';
 
-void main(){
-  runApp(ChessApp());
+void main() {
+  runApp(const ChessApp());
 }
-
 
 class ChessApp extends StatelessWidget {
   const ChessApp({super.key});
