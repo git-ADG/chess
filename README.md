@@ -10,7 +10,7 @@
 
 <h2>Project Screenshots:</h2>
 
-<img src="https://drive.google.com/uc?export=view&amp;id=1X8avClLvkWzz23Ek4Bj3_k4aKHH811IA" alt="project-screenshot" width="400" height="500/">
+<img src="https://drive.google.com/uc?export=view&amp;id=1X8avClLvkWzz23Ek4Bj3_k4aKHH811IA" alt="project-screenshot" width="400" height="600/">
 
   
   
