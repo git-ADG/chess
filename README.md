@@ -1,6 +1,5 @@
 <h1 align="center" id="title">Chess Game</h1>
 
-<p align="center"><img src="https://socialify.git.ci/git-ADG/chess/image?name=1&amp;owner=1&amp;theme=Light" alt="project-image"></p>
 
 <p id="description">A player vs player chess game built using flutter.</p>
 
@@ -10,7 +9,7 @@
 
 <h2>Project Screenshots:</h2>
 
-<img src="https://drive.usercontent.google.com/download?id=1VZCgcTGoUPhPWwbkuciUi7Msk0op2YOb" alt="project-screenshot" width="350" height="600/">
+<img src="https://drive.usercontent.google.com/download?id=1VZCgcTGoUPhPWwbkuciUi7Msk0op2YOb" alt="project-screenshot" width="350" height="900/">
 
   
   
