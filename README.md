@@ -9,7 +9,7 @@
 
 <h2>Project Screenshots:</h2>
 
-<img src="https://drive.usercontent.google.com/download?id=1VZCgcTGoUPhPWwbkuciUi7Msk0op2YOb" alt="project-screenshot" width="350" height="900/">
+<img src="https://drive.usercontent.google.com/download?id=1VZCgcTGoUPhPWwbkuciUi7Msk0op2YOb" alt="project-screenshot" width="360" height="900/">
 
   
   
