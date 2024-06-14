@@ -508,8 +508,19 @@ class _ChessState extends State<Chess> {
     checkStatus = false;
     WhitePieceTaken.clear();
     BlackPieceTaken.clear();
-    WhiteKingPosition = [0, 4];
-    BlackKingPosition = [7, 4];
+    WhiteKingPosition = [7, 4];
+    BlackKingPosition = [0, 4];
+    isWhiteTurn = true;
+    setState(() {});
+  }
+
+  void restartGame() {
+    _initializeBoard();
+    checkStatus = false;
+    WhitePieceTaken.clear();
+    BlackPieceTaken.clear();
+    WhiteKingPosition = [7, 4];
+    BlackKingPosition = [0, 4];
     isWhiteTurn = true;
     setState(() {});
   }
@@ -517,6 +528,10 @@ class _ChessState extends State<Chess> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: restartGame,
+        child: Icon(Icons.lock_reset),
+      ),
       backgroundColor: Colors.grey[500],
       body: Column(
         children: [
