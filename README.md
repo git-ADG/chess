@@ -6,11 +6,11 @@
 
 <h2>🚀 Demo</h2>
 
-[https://drive.google.com/uc?export=view&id=1WIU-rec6BV5a\_reI\_toZGviiEAXzQC8Y](https://drive.google.com/uc?export=view&id=1WIU-rec6BV5a_reI_toZGviiEAXzQC8Y)
+[[https://drive.google.com/uc?export=view&id=1WIU-rec6BV5a\_reI\_toZGviiEAXzQC8Y]([https://drive.google.com/uc?export=view&id=1WIU-rec6BV5a_reI_toZGviiEAXzQC8Y](https://drive.google.com/file/d/1spIDzgHkUuXf1qUG_WPeTjhzVwMQzRBs/view?usp=drive_link))](https://drive.google.com/file/d/1spIDzgHkUuXf1qUG_WPeTjhzVwMQzRBs/view?usp=drive_link)
 
 <h2>Project Screenshots:</h2>
 
-<img src="https://drive.google.com/uc?export=view&amp;id=1X8avClLvkWzz23Ek4Bj3_k4aKHH811IA" alt="project-screenshot" width="350" height="600/">
+<img src="[https://drive.google.com/uc?export=view&amp;id=1X8avClLvkWzz23Ek4Bj3_k4aKHH811IA](https://drive.google.com/file/d/1VZCgcTGoUPhPWwbkuciUi7Msk0op2YOb/view?usp=sharing)" alt="project-screenshot" width="350" height="600/">
 
   
   
