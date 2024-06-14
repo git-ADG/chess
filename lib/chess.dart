@@ -25,8 +25,8 @@ class _ChessState extends State<Chess> {
 
   bool isWhiteTurn = true;
 
-  List<int> WhiteKingPosition = [0, 4];
-  List<int> BlackKingPosition = [7, 4];
+  List<int> WhiteKingPosition = [7, 4];
+  List<int> BlackKingPosition = [0, 4];
 
   bool checkStatus = false;
 
@@ -269,8 +269,9 @@ class _ChessState extends State<Chess> {
     List<int>? OriginalKingPosition;
 
     if (piece.type == ChessPieceType.king) {
-      OriginalKingPosition =
-          piece.iswhite ? WhiteKingPosition : BlackKingPosition;
+      OriginalKingPosition = piece.iswhite
+          ? List.from(WhiteKingPosition)
+          : List.from(BlackKingPosition);
       if (piece.iswhite) {
         WhiteKingPosition = [EndRow, EndCol];
       } else {
@@ -294,6 +295,97 @@ class _ChessState extends State<Chess> {
       }
     }
     return !kingInCheck;
+  }
+
+  bool isKingInCheck(bool isWhiteKing) {
+    List<int> KingPosition =
+        isWhiteKing ? WhiteKingPosition : BlackKingPosition;
+
+    for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 8; j++) {
+        if (board[i][j] == null || board[i][j]!.iswhite == isWhiteKing) {
+          continue;
+        }
+        List<List<int>> pieceValidMoves =
+            CalculateRealValidMoves(i, j, board[i][j], false);
+        if (pieceValidMoves.any((move) =>
+            move[0] == KingPosition[0] && move[1] == KingPosition[1])) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  bool isCheckMate(bool isWhiteKing) {
+    if (!isKingInCheck(isWhiteKing)) {
+      return false;
+    }
+
+    for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 8; j++) {
+        if (board[i][j] == null || board[i][j]!.iswhite != isWhiteKing) {
+          continue;
+        }
+        List<List<int>> pieceValidMoves = CalculateRealValidMoves(
+            i, j, board[i][j], false); // Check valid moves
+        for (var move in pieceValidMoves) {
+          if (SimulatedMoveIsSafe(board[i][j]!, i, j, move[0], move[1])) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  }
+
+  void movePiece(int newRow, int newCol) {
+    if (board[newRow][newCol] != null) {
+      var capturedPiece = board[newRow][newCol];
+      if (capturedPiece!.iswhite) {
+        WhitePieceTaken.add(capturedPiece);
+      } else {
+        BlackPieceTaken.add(capturedPiece);
+      }
+    }
+
+    board[newRow][newCol] = SelectedPiece;
+    board[SelectedRow][SelectedCol] = null;
+
+    if (SelectedPiece!.type == ChessPieceType.king) {
+      if (SelectedPiece!.iswhite) {
+        WhiteKingPosition = [newRow, newCol];
+      } else {
+        BlackKingPosition = [newRow, newCol];
+      }
+    }
+
+    if (isKingInCheck(!isWhiteTurn)) {
+      checkStatus = true;
+    } else {
+      checkStatus = false;
+    }
+
+    setState(() {
+      SelectedPiece = null;
+      SelectedRow = -1;
+      SelectedCol = -1;
+      validMoves = [];
+    });
+
+    if (isCheckMate(!isWhiteTurn)) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("CHECK MATE!!!"),
+          actions: [
+            TextButton(onPressed: resetGame, child: const Text("Play Again"))
+          ],
+        ),
+      );
+    }
+
+    isWhiteTurn = !isWhiteTurn;
   }
 
   void _initializeBoard() {
@@ -410,55 +502,6 @@ class _ChessState extends State<Chess> {
     board = newBoard;
   }
 
-  void movePiece(int newRow, int newCol) {
-    if (board[newRow][newCol] != null) {
-      var capturedPiece = board[newRow][newCol];
-      if (capturedPiece!.iswhite) {
-        WhitePieceTaken.add(capturedPiece);
-      } else {
-        BlackPieceTaken.add(capturedPiece);
-      }
-    }
-
-    board[newRow][newCol] = SelectedPiece;
-    board[SelectedRow][SelectedCol] = null;
-
-    if (SelectedPiece!.type == ChessPieceType.king) {
-      if (SelectedPiece!.iswhite) {
-        WhiteKingPosition = [newRow, newCol];
-      } else {
-        BlackKingPosition = [newRow, newCol];
-      }
-    }
-
-    if (isKingInCheck(!isWhiteTurn)) {
-      checkStatus = true;
-    } else {
-      checkStatus = false;
-    }
-
-    setState(() {
-      SelectedPiece = null;
-      SelectedRow = -1;
-      SelectedCol = -1;
-      validMoves = [];
-    });
-
-    if (isCheckMate(!isWhiteTurn)) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("CHECK MATE!!!"),
-          actions: [
-            TextButton(onPressed: resetGame, child: const Text("Play Again"))
-          ],
-        ),
-      );
-    }
-
-    isWhiteTurn = !isWhiteTurn;
-  }
-
   void resetGame() {
     Navigator.pop(context);
     _initializeBoard();
@@ -471,46 +514,6 @@ class _ChessState extends State<Chess> {
     setState(() {});
   }
 
-  bool isKingInCheck(bool isWhiteKing) {
-    List<int> KingPosition =
-        isWhiteKing ? WhiteKingPosition : BlackKingPosition;
-
-    for (int i = 0; i < 8; i++) {
-      for (int j = 0; j < 8; j++) {
-        if (board[i][j] == null || board[i][j]!.iswhite == isWhiteKing) {
-          continue;
-        }
-        List<List<int>> pieceValidMoves =
-            CalculateRealValidMoves(i, j, board[i][j], false);
-        if (pieceValidMoves.any((move) =>
-            move[0] == KingPosition[0] && move[1] == KingPosition[1])) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  bool isCheckMate(bool isWhiteKing) {
-    if (!isKingInCheck(isWhiteKing)) {
-      return false;
-    }
-
-    for (int i = 0; i < 8; i++) {
-      for (int j = 0; j < 8; j++) {
-        if (board[i][j] == null || board[i][j]!.iswhite != isWhiteKing) {
-          continue;
-        }
-        List<List<int>> pieceValidMoves =
-            CalculateRealValidMoves(i, j, board[i][j], true);
-        if (pieceValidMoves.isNotEmpty) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -521,8 +524,8 @@ class _ChessState extends State<Chess> {
               child: GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
             itemCount: WhitePieceTaken.length,
-            gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 8),
             itemBuilder: (context, index) => DeadPiece(
               ImagePath: WhitePieceTaken[index].imagePath,
               isWhite: true,
@@ -565,8 +568,8 @@ class _ChessState extends State<Chess> {
               child: GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
             itemCount: BlackPieceTaken.length,
-            gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 8),
             itemBuilder: (context, index) => DeadPiece(
               ImagePath: BlackPieceTaken[index].imagePath,
               isWhite: false,
